@@ -18,7 +18,6 @@ namespace SamSharp
         private int newWidth = 0;
         private int newHeight = 0;
         private DenseTensor<float> imageEmbedding;
-        private byte[] originalPixels = null;
         private bool initalized = false;
         public SamInferenceSession(string encoderPath, string decoderPath, int sideLength = 1024)
         {
@@ -80,7 +79,6 @@ namespace SamSharp
                 throw new ArgumentException("Invalid image");
             }
 
-            originalPixels = ImageUtility.GetOriginalPixels(image);
 
             byte[] resizedPixels = ImageUtility.GetPixelsResized(image, sideLength, out oldWidth, out oldHeight);
             byte[] inputTensorValues = new byte[sideLength * sideLength * 3];
@@ -117,7 +115,6 @@ namespace SamSharp
                 return;
             }
 
-            originalPixels = ImageUtility.GetOriginalPixels(System.IO.File.ReadAllBytes(imgPath));
 
             byte[] resizedPixels = ImageUtility.GetPixelsResized(imgPath, sideLength, out oldWidth, out oldHeight);
             ImageUtility.GetResizedDimensions(oldWidth, oldHeight, sideLength, out newWidth, out newHeight);
@@ -181,16 +178,6 @@ namespace SamSharp
             using var results = decoder.Run(inputList);
             var masks = results.Where(x => x.Name == "masks").First().AsTensor<float>();
             float[] result = masks.ToArray();
-            byte[] pixelBytes = new byte[originalPixels.Length];
-            for (int j= 0; j < result.Length; j++)
-            {
-
-                pixelBytes[(j*3)] = (result[j] > 0) ? originalPixels[j] : (byte)((float)originalPixels[(j*3)] * 0.5f);
-
-                pixelBytes[(j * 3)+1] = (result[j] > 0) ? originalPixels[j] : (byte)((float)originalPixels[(j*3)+1] * 0.5f);
-
-                pixelBytes[(j * 3) + 2] = (result[j] > 0) ? originalPixels[j] : (byte)((float)originalPixels[(j * 3) + 2] * 0.5f);
-            }
 
             return result;
 
