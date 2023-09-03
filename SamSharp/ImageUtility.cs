@@ -93,8 +93,6 @@ namespace SamSharp
             pg.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
             pg.DrawImage(bmp, 0, 0);
 
-            string savePath = System.IO.Path.GetDirectoryName(path) + "//"+System.IO.Path.GetFileNameWithoutExtension(path) + "_resized_padded.jpg";
-            paddedMap.Save(savePath);
             Rectangle rect = new Rectangle(0, 0, paddedMap.Width, paddedMap.Height);
             BitmapData bmpData = paddedMap.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
             int byteSize = Math.Abs(bmpData.Stride) * bmpData.Height;

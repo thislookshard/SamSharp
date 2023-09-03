@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace SamSharp
 {
-    public class SamInferenceSession
+    public class SamInferenceSession : IDisposable
     {
         private InferenceSession encoder;
         private InferenceSession decoder;
@@ -18,7 +18,6 @@ namespace SamSharp
         private int newWidth = 0;
         private int newHeight = 0;
         private DenseTensor<float> imageEmbedding;
-        private List<NamedOnnxValue> inputs = new();
         private byte[] originalPixels = null;
         private bool initalized = false;
         public SamInferenceSession(string encoderPath, string decoderPath, int sideLength = 1024)
@@ -54,21 +53,21 @@ namespace SamSharp
             encoder = new InferenceSession(encoderPath);
             decoder = new InferenceSession(decoderPath);
             initalized = true;
-            AddDefaultValues();
         }
 
-        private void AddDefaultValues()
+        public void Dispose()
         {
-            DenseTensor<float> labelTensor = new(new[] { 1f }, new[] { 1, 1 });
-            inputs.Add(NamedOnnxValue.CreateFromTensor("point_labels", labelTensor));
+            if (encoder != null)
+            {
+                encoder.Dispose();
+                encoder = null;
+            }
 
-            DenseTensor<float> maskInput = new(new float[256 * 256], new[] { 1, 1, 256, 256 });
-            inputs.Add(NamedOnnxValue.CreateFromTensor("mask_input", maskInput));
-
-            DenseTensor<float> hasMask = new(new[] { 0f }, new[] { 1 });
-            inputs.Add(NamedOnnxValue.CreateFromTensor("has_mask_input", hasMask));
-
-           
+            if (decoder != null)
+            {
+                decoder.Dispose();
+                decoder = null;
+            }
         }
 
         public void SetImage(byte[] image)
@@ -193,8 +192,6 @@ namespace SamSharp
                 pixelBytes[(j * 3) + 2] = (result[j] > 0) ? originalPixels[j] : (byte)((float)originalPixels[(j * 3) + 2] * 0.5f);
             }
 
-            string savePath = @"C:\Users\Sam Luedtke\OneDrive\Pictures\SamModel\result.jpg";
-            ImageUtility.SaveImage(pixelBytes, oldWidth, oldHeight, savePath);
             return result;
 
         }

@@ -32,7 +32,7 @@ class Program {
 
         Console.WriteLine("Initializing Model...");
 
-        SamInferenceSession sam = new SamInferenceSession(encoderPath, decoderPath);
+        using SamInferenceSession sam = new SamInferenceSession(encoderPath, decoderPath);
         sam.Initialize();
 
         string windowName = "OnnxTester C#";
