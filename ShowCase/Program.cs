@@ -35,7 +35,7 @@ class Program {
         using SamInferenceSession sam = new SamInferenceSession(encoderPath, decoderPath);
         sam.Initialize();
 
-        string windowName = "OnnxTester C#";
+        string windowName = "OnnxTester C# (Click different parts of image to segment)";
         Console.WriteLine("Setting image...");
         sam.SetImage(imagePath);
 
