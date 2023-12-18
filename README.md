@@ -12,3 +12,10 @@ There are two models needed for this to run
 2. <b>Decoder:</b> The decoder model can be generated from the Segment Anything's [Onnx Model Example's](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/onnx_model_example.ipynb) notebook
 
 Once these are generated, choose these as the encoder and decoder model files when prompted and watch the magic happen.
+
+
+### Unity Compatibility ###
+
+The SamInferenceSession class will work in Unity with all the required DLLs for the [OnnxRuntime](https://www.nuget.org/packages/Microsoft.ML.OnnxRuntime#readme-body-tab) in the project's plugins folder. The ImageUtility class should work as well with required System.Drawing DLLs, but it would be better to have a custom written class that uses Unity's Texture2D at that point.
+
+It also should work with the (Sentis)[https://unity.com/products/sentis] package with  rewritten classes
