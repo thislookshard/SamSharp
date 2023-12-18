@@ -19,6 +19,8 @@ namespace SamSharp
         private int newHeight = 0;
         private DenseTensor<float> imageEmbedding;
         private bool initalized = false;
+
+        List<NamedOnnxValue> inputList = new();
         public SamInferenceSession(string encoderPath, string decoderPath, int sideLength = 1024)
         {
             this.encoderPath = encoderPath;
@@ -26,10 +28,6 @@ namespace SamSharp
             this.sideLength = sideLength;
         }
 
-        public string Test()
-        {
-            return $"Encoder located at {encoderPath} and decoder at {decoderPath}";
-        }
 
         public void Initialize() 
         {
@@ -51,6 +49,7 @@ namespace SamSharp
 
             encoder = new InferenceSession(encoderPath);
             decoder = new InferenceSession(decoderPath);
+            InitList();
             initalized = true;
         }
 
@@ -103,8 +102,7 @@ namespace SamSharp
             DenseTensor<byte> inputTensor = new DenseTensor<byte>(inputTensorValues, new[] { 1, 3, sideLength, sideLength });
             using var results = encoder.Run(new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("input", inputTensor) });
             imageEmbedding = results.First().AsTensor<float>().ToDenseTensor();
-            Console.WriteLine("SetEmbedding");
-
+            SetImageInputs();
         }
         
         public void SetImage(string imgPath) { 
@@ -138,7 +136,36 @@ namespace SamSharp
             DenseTensor<byte> inputTensor = new DenseTensor<byte>(inputTensorValues, new[] { 1, 3, sideLength, sideLength });
             using var results = encoder.Run(new List<NamedOnnxValue> { NamedOnnxValue.CreateFromTensor("input", inputTensor) });
             imageEmbedding = results.First().AsTensor<float>().ToDenseTensor();
+            SetImageInputs();
+        }
 
+        private void InitList() {
+
+            DenseTensor<float> labelTensor = new(new[] { 1f }, new[] { 1, 1 });
+            inputList.Add(NamedOnnxValue.CreateFromTensor("point_labels", labelTensor));
+
+            DenseTensor<float> maskInput = new(new float[256 * 256], new[] { 1, 1, 256, 256 });
+            inputList.Add(NamedOnnxValue.CreateFromTensor("mask_input", maskInput));
+
+            DenseTensor<float> hasMask = new(new[] { 0f }, new[] { 1 });
+            inputList.Add(NamedOnnxValue.CreateFromTensor("has_mask_input", hasMask));
+        }
+
+        private void SetImageInputs() {
+
+            int index = inputList.FindIndex(x => x.Name == "orig_im_size");
+            if (index != -1) {
+                inputList.RemoveAt(index);
+            }
+            DenseTensor<float> originalSize = new(new[] { (float)oldHeight, (float)oldWidth }, new[] { 2 });
+            inputList.Add(NamedOnnxValue.CreateFromTensor("orig_im_size", originalSize));
+
+            index = inputList.FindIndex(x => x.Name == "image_embeddings");
+            if (index != -1) {
+                inputList.RemoveAt(index);
+            }
+
+            inputList.Add(NamedOnnxValue.CreateFromTensor("image_embeddings", imageEmbedding));
         }
 
        
@@ -155,25 +182,13 @@ namespace SamSharp
             yPoint = (int)(yPoint * ((float)newHeight / oldHeight));
 
 
-
-            List<NamedOnnxValue> inputList = new();
-
-            inputList.Add(NamedOnnxValue.CreateFromTensor("image_embeddings", imageEmbedding));
+            int index = inputList.FindIndex(x => x.Name == "point_coords");
+            if (index != -1) {
+                inputList.RemoveAt(index);
+            }
 
             DenseTensor<float> pointTensor = new(new[] {(float)xPoint, (float)yPoint }, new[] {1,1,2},false);
             inputList.Add(NamedOnnxValue.CreateFromTensor<float>("point_coords", pointTensor));
-
-            DenseTensor<float> labelTensor = new(new[] { 1f }, new[] { 1, 1 });
-            inputList.Add(NamedOnnxValue.CreateFromTensor("point_labels", labelTensor));
-
-            DenseTensor<float> maskInput = new(new float[256*256], new[] { 1, 1, 256, 256 });
-            inputList.Add(NamedOnnxValue.CreateFromTensor("mask_input", maskInput));
-
-            DenseTensor<float> hasMask = new(new[] { 0f }, new[] { 1 });
-            inputList.Add(NamedOnnxValue.CreateFromTensor("has_mask_input", hasMask));
-
-            DenseTensor<float> originalSize = new(new[] { (float)oldHeight, (float)oldWidth }, new[] { 2 });
-            inputList.Add(NamedOnnxValue.CreateFromTensor("orig_im_size", originalSize));
 
             using var results = decoder.Run(inputList);
             var masks = results.Where(x => x.Name == "masks").First().AsTensor<float>();
