@@ -18,4 +18,4 @@ Once these are generated, choose these as the encoder and decoder model files wh
 
 The SamInferenceSession class will work in Unity with all the required DLLs for the [OnnxRuntime](https://www.nuget.org/packages/Microsoft.ML.OnnxRuntime#readme-body-tab) in the project's plugins folder. The ImageUtility class should work as well with required System.Drawing DLLs, but it would be better to have a custom written class that uses Unity's Texture2D at that point.
 
-It also should work with the (Sentis)(https://unity.com/products/sentis) package with  rewritten classes
+It also should work with the [Sentis](https://unity.com/products/sentis) package with rewritten classes
