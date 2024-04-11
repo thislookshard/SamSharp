@@ -8,8 +8,9 @@ from onnxruntime.quantization import QuantType
 from onnxruntime.quantization.quantize import quantize_dynamic
 
 # Generate preprocessing model of Segment-anything in onnx format
-# Target image size is 1024x720
+# Target image size is 1024x1024
 image_size = (1024, 1024)
+# To use the full-size encoder,
 # Download Segment-anything model "sam_vit_h_4b8939.pth" from https://github.com/facebookresearch/segment-anything#model-checkpoints
 # and change the path below
 checkpoint = 'mobile_sam.pt'

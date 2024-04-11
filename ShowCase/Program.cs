@@ -35,14 +35,14 @@ class Program {
         using SamInferenceSession sam = new SamInferenceSession(encoderPath, decoderPath);
         sam.Initialize();
 
-        string windowName = "OnnxTester C# (Click different parts of image to segment)";
+        string windowName = "Segment Anything (Click different parts of image to segment)";
         Console.WriteLine("Setting image...");
         sam.SetImage(imagePath);
 
-        var output = new Mat(imagePath);
+        var displayImage = new Mat(imagePath);
         var baseImage = new Mat(imagePath);
         var window = new Window(windowName);
-        Cv2.ImShow(windowName, output);
+        Cv2.ImShow(windowName, displayImage);
        
         Cv2.SetMouseCallback(windowName, (mouseEvent, xCoord, yCoord, flags, ptr) =>
         {
@@ -50,21 +50,21 @@ class Program {
             {
                 var mask = sam.GetPointMask(xCoord, yCoord);
 
-                output.Dispose();
-                output = new Mat(new OpenCvSharp.Size(baseImage.Width, baseImage.Height), baseImage.Type());
+                displayImage.Dispose();
+                displayImage = new Mat(new OpenCvSharp.Size(baseImage.Width, baseImage.Height), baseImage.Type());
 
                 int pixel = 0;
                 for (int y = 0; y < baseImage.Rows; y++)
                 {
                     for (int x = 0; x < baseImage.Cols; x++)
                     {
-                        double factor = mask[pixel++] > 0 ? 1.0 : 0.5;
-                        output.At<Vec3b>(y, x) = baseImage.At<Vec3b>(y, x) * factor;
+                        double vibrance = mask[pixel++] > 0 ? 1.0 : 0.5;
+                        displayImage.At<Vec3b>(y, x) = baseImage.At<Vec3b>(y, x) * vibrance;
 
                     }
                 }
 
-                Cv2.ImShow(windowName, output);
+                Cv2.ImShow(windowName, displayImage);
             }
         });
 
