@@ -39,16 +39,16 @@ class Program {
         Console.WriteLine("Setting image...");
         sam.SetImage(imagePath);
 
-        var displayImage = new Mat(imagePath);
-        var baseImage = new Mat(imagePath);
-        var window = new Window(windowName);
+        Mat displayImage = new(imagePath);
+        Mat baseImage = new(imagePath);
+        Window window = new(windowName);
         Cv2.ImShow(windowName, displayImage);
        
         Cv2.SetMouseCallback(windowName, (mouseEvent, xCoord, yCoord, flags, ptr) =>
         {
             if (mouseEvent == MouseEventTypes.LButtonDown)
             {
-                var mask = sam.GetPointMask(xCoord, yCoord);
+                float[] mask = sam.GetPointMask(xCoord, yCoord);
 
                 displayImage.Dispose();
                 displayImage = new Mat(new OpenCvSharp.Size(baseImage.Width, baseImage.Height), baseImage.Type());
