@@ -2,7 +2,7 @@
 ---
 A C# interface for Meta's Segment Anything Model (SAM). This repo contains a small interface project to interact with SAM and get a simple point mask from an image, as well as a small demo project to test mask generation from an image file in an interactive window.
 
-The ImageUtility class uses System.Drawing for image processing; therefore this class is currently only compatable with Windows. Eventually I will migrate this to a cross-platform library if this project gets a full nuget release.
+The ImageUtility class uses System.Drawing for image processing, therefore this class is currently only compatable with Windows. Eventually I will migrate this to a cross-platform library if this project gets a full nuget release.
 
 ### Generating the Models ###
 
