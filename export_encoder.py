@@ -55,7 +55,6 @@ torch.onnx.export(model_trace, input_image_torch, output_raw_path,
 quantize_dynamic(
     model_input=output_raw_path,
     model_output=output_path,
-    optimize_model=True,
     per_channel=False,
     reduce_range=False,
     weight_type=QuantType.QUInt8,
