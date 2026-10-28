@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 import os
+import shutil
 from mobile_sam import sam_model_registry, SamPredictor
 #from segment_anything import sam_model_registry, SamPredictor
 from segment_anything.utils.transforms import ResizeLongestSide
@@ -16,7 +17,9 @@ image_size = (1024, 1024)
 checkpoint = 'mobile_sam.pt'
 model_type = "vit_t"
 output_path = 'mobile_encoder.onnx'
+
 quantize = False
+optimize_quantization = True
 
 
 # The raw directory can be deleted after the quantization is done
@@ -52,11 +55,14 @@ model_trace = torch.jit.trace(model, input_image_torch)
 torch.onnx.export(model_trace, input_image_torch, output_raw_path,
                   input_names=['input'], output_names=['output'])
 
-quantize_dynamic(
-    model_input=output_raw_path,
-    model_output=output_path,
-    optimize_model=True,
-    per_channel=False,
-    reduce_range=False,
-    weight_type=QuantType.QUInt8,
-)
+if (quantize):
+    quantize_dynamic(
+        model_input=output_raw_path,
+        model_output=output_path,
+        optimize_model=optimize_quantization,
+        per_channel=False,
+        reduce_range=False,
+        weight_type=QuantType.QUInt8,
+    )
+else:
+    shutil.copyfile(output_raw_path, output_path)
