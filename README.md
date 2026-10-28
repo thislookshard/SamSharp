@@ -4,7 +4,7 @@ A C# interface for Meta's Segment Anything Model (SAM). This repo contains a sma
 
 The ImageUtility class uses System.Drawing for image processing, therefore this class is currently only compatable with Windows. Eventually I will migrate this to a cross-platform library if this project gets a full nuget release.
 
-### Generating the Models ###
+### Generating the Models
 
 There are two models needed for this to run
 
@@ -12,6 +12,12 @@ There are two models needed for this to run
 2. <b>Decoder:</b> The decoder model can be generated from the Segment Anything's [Onnx Model Example's](https://github.com/facebookresearch/segment-anything/blob/main/notebooks/onnx_model_example.ipynb) notebook
 
 Once these are generated, select the preprocessor and decoder onnx files when prompted with the file dialog. Then select an image.
+
+### Distorted or misplaced masks
+
+If segmentation masks are stretched or misplaced, try a known working encoder/decoder pair or regenerate both models using compatible export code and checkpoints. The image encoder must accept RGB `uint8` input named `input` with shape `[1, 3, 1024, 1024]`, including normalization inside the model.
+
+Older SAM decoder exports can contain a fixed `683 × 1024` padding crop. Regenerate affected decoder files using current SAM/MobileSAM postprocessing, which calculates the crop from `orig_im_size`. Updating the Python package alone does not update an existing ONNX file. No ShowCase drawing changes are needed for this model issue.
 
 ![alt text](start_window.png)
 
